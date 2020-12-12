@@ -4,13 +4,20 @@ import httpJsonBodyParser from '@middy/http-json-body-parser';
 import httpEventNormalizer from '@middy/http-event-normalizer';
 import httpErrorHandler from '@middy/http-error-handler';
 import createError from 'http-errors';
+import { getAuctionById } from './getAuction';
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
 async function placeBid(event, context) {
     const { id } = event.pathParameters;   
     const { amount } = event.body;
-    let updateAuction;
+
+    const auction = await getAuctionById(id);
+    
+    if(amount <= auction.highestBid.amount){
+        throw new createError.Forbidden(`Your bid must be higher than ${auction.highestBid.amount}!`);
+    }
+    
     const params = {
         TableName: process.env.AUCTIONS_TABLE_NAME,
         Key: { id },
@@ -21,6 +28,7 @@ async function placeBid(event, context) {
         ReturnValues: 'ALL_NEW',
     };
 
+    let updateAuction;
     try {
         let data = await dynamodb.update(params).promise();
         updateAuction = data.Attributes;

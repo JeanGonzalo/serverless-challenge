@@ -40,7 +40,7 @@ functions:
           method: GET
           path: /auction/{id}
   
-  PlaceBid:
+  placeBid:
     handler: src/handlers/placeBid.handler
     events:
       - http:
