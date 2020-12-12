@@ -14,7 +14,7 @@ async function getAuctions(event, context) {
         TableName: process.env.AUCTIONS_TABLE_NAME,        
         }).promise();  
         
-        auctions = data.Items;
+        auctions = data.Items
     } catch (error) {
         console.error(error);
         throw new createError.InternalServerError(error);
