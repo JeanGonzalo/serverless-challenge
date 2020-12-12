@@ -1,8 +1,5 @@
 import AWS from 'aws-sdk';
-import middy from '@middy/core';
-import httpJsonBodyParser from '@middy/http-json-body-parser';
-import httpEventNormalizer from '@middy/http-event-normalizer';
-import httpErrorHandler from '@middy/http-error-handler';
+import commonMiddleware from '../lib/commonMiddleware';
 import createError from 'http-errors';
 import { getAuctionById } from './getAuction';
 
@@ -17,7 +14,7 @@ async function placeBid(event, context) {
     if(amount <= auction.highestBid.amount){
         throw new createError.Forbidden(`Your bid must be higher than ${auction.highestBid.amount}!`);
     }
-    
+
     const params = {
         TableName: process.env.AUCTIONS_TABLE_NAME,
         Key: { id },
@@ -43,10 +40,7 @@ async function placeBid(event, context) {
     };
 }
 
-export const handler = middy(placeBid)
-    .use(httpJsonBodyParser())
-    .use(httpEventNormalizer())
-    .use(httpErrorHandler());
+export const handler = commonMiddleware(placeBid);
 
 
 
